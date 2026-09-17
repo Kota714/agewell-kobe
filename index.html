@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Age-Well KOBE 2026 クイズ</title>
+<style>
+  :root {
+    --bg: #fdf6f1;
+    --card-bg: #ffffff;
+    --text: #3a2a20;
+    --text-muted: #8a6f60;
+    --accent: #ef5a35;
+    --accent-2: #ff8a5c;
+    --accent-soft: #ffe4d6;
+    --border: #f0d9cd;
+    --correct: #2f9e5c;
+    --correct-bg: #e6f7ee;
+    --incorrect: #d64545;
+    --incorrect-bg: #fdeaea;
+    --shadow: 0 10px 30px rgba(239, 90, 53, 0.12);
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --bg: #241a15;
+      --card-bg: #2f231c;
+      --text: #f6ece5;
+      --text-muted: #cbb2a3;
+      --accent: #ff7a52;
+      --accent-2: #ffa374;
+      --accent-soft: #4a2f22;
+      --border: #4a362b;
+      --correct: #6fd39a;
+      --correct-bg: #1f3a2a;
+      --incorrect: #ff8686;
+      --incorrect-bg: #402323;
+      --shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #241a15;
+    --card-bg: #2f231c;
+    --text: #f6ece5;
+    --text-muted: #cbb2a3;
+    --accent: #ff7a52;
+    --accent-2: #ffa374;
+    --accent-soft: #4a2f22;
+    --border: #4a362b;
+    --correct: #6fd39a;
+    --correct-bg: #1f3a2a;
+    --incorrect: #ff8686;
+    --incorrect-bg: #402323;
+    --shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 60px;
+  }
+  .wrap { width: 100%; max-width: 640px; }
+
+  header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-size: clamp(22px, 5vw, 30px);
+    margin: 0 0 6px;
+    line-height: 1.3;
+  }
+  h1 span { color: var(--accent); }
+  .sub {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 24px 20px 28px;
+    border: 1px solid var(--border);
+  }
+
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .progress-bar {
+    height: 8px;
+    background: var(--accent-soft);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: 999px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  .question {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.6;
+    margin: 0 0 18px;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    text-align: left;
+    padding: 13px 16px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+  .option:hover:not(:disabled) {
+    border-color: var(--accent-2);
+    transform: translateY(-1px);
+  }
+  .option:disabled { cursor: default; }
+  .option.correct {
+    border-color: var(--correct);
+    background: var(--correct-bg);
+    color: var(--correct);
+    font-weight: 700;
+  }
+  .option.incorrect {
+    border-color: var(--incorrect);
+    background: var(--incorrect-bg);
+    color: var(--incorrect);
+    font-weight: 700;
+  }
+
+  .feedback {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok { background: var(--correct-bg); color: var(--correct); }
+  .feedback.ng { background: var(--incorrect-bg); color: var(--incorrect); }
+
+  .next-btn {
+    margin-top: 18px;
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: none;
+  }
+  .next-btn.show { display: block; }
+  .next-btn:active { transform: scale(0.98); }
+
+  .result {
+    text-align: center;
+    display: none;
+  }
+  .result.show { display: block; }
+  .result-score {
+    font-size: 44px;
+    font-weight: 800;
+    color: var(--accent);
+    margin: 6px 0;
+  }
+  .result-msg {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+  .retry-btn {
+    padding: 12px 28px;
+    border: 1.5px solid var(--accent);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 22px;
+  }
+
+  /* イントロ画面 */
+  .intro { display: block; }
+  .intro.hide { display: none; }
+  .name-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    margin: 6px 0 18px;
+  }
+  .start-btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .intro-label { font-size: 13px; color: var(--text-muted); margin: 0 0 4px; }
+
+  /* 管理者リンク */
+  .admin-link {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-decoration: underline;
+    cursor: pointer;
+    background: none;
+    border: none;
+    width: 100%;
+  }
+
+  /* 管理者モーダル */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 50;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 22px 20px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+  }
+  .modal-box h2 { font-size: 16px; margin: 0 0 14px; }
+  .modal-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .modal-row input {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+  }
+  .modal-row button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .modal-close {
+    display: block;
+    margin: 14px auto 0;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .result-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .result-table th, .result-table td {
+    text-align: left;
+    padding: 7px 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .result-table th { color: var(--text-muted); font-weight: 600; }
+  .modal-msg { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
+  .modal-msg.error { color: var(--incorrect); }
+  .modal-summary { font-size: 13px; color: var(--text-muted); margin: 4px 0 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">2026.9.19 SAT - 9.20 SUN</span>
+    <h1>Age-Well <span>KOBE</span> 2026<br>来場者クイズ全50問</h1>
+    <p class="sub">会場のパンフレット・うちわを見ればぜんぶわかる！挑戦してみてね</p>
+  </header>
+
+  <div class="card">
+    <div class="intro" id="introArea">
+      <p class="intro-label">お名前・ニックネーム（回答一覧に表示されます／空欄でも参加できます）</p>
+      <input type="text" class="name-input" id="nameInput" placeholder="例：やまだ" maxlength="20">
+      <button class="start-btn" id="startBtn">クイズをはじめる</button>
+    </div>
+
+    <div id="quizArea" style="display:none;">
+      <div class="progress-row">
+        <span id="qNum">第1問 / 50</span>
+        <span id="qScore">正解 0</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <p class="question" id="questionText"></p>
+      <div class="options" id="optionsArea"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="nextBtn">次の問題へ</button>
+    </div>
+
+    <div class="result" id="resultArea">
+      <p class="sub">結果発表</p>
+      <div class="result-score" id="finalScore">0 / 50</div>
+      <p class="result-msg" id="finalMsg"></p>
+      <button class="retry-btn" id="retryBtn">もう一度挑戦する</button>
+    </div>
+
+    <button class="admin-link" id="adminLink">▶ 運営者用：みんなの回答を見る</button>
+  </div>
+
+  <footer>主催：Age-Well Festival実行委員会（株式会社AgeWellJapan、神戸新聞社）</footer>
+</div>
+
+<div class="modal-overlay" id="adminModal">
+  <div class="modal-box">
+    <h2>運営者用：回答一覧</h2>
+    <div class="modal-row">
+      <input type="password" id="adminPassword" placeholder="パスワード">
+      <button id="adminSubmit">表示</button>
+    </div>
+    <p class="modal-msg" id="adminMsg"></p>
+    <div id="adminResultWrap" style="display:none;">
+      <p class="modal-summary" id="adminSummary"></p>
+      <table class="result-table">
+        <thead><tr><th>日時</th><th>お名前</th><th>スコア</th></tr></thead>
+        <tbody id="adminTableBody"></tbody>
+      </table>
+    </div>
+    <button class="modal-close" id="adminClose">閉じる</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  // ── イベント基本情報 ──
+  { q: "Age-Well KOBE 2026の開催日はいつ？", opts: ["2026年9月12日〜13日","2026年9月19日〜20日","2026年9月26日〜27日","2026年10月3日〜4日"], a: 1 },
+  { q: "ブースエリアの開催時間は？", opts: ["9:00〜16:00","10:00〜17:00","11:00〜18:00","10:00〜18:00"], a: 1 },
+  { q: "ステージイベントは何時まで開催される？", opts: ["15:00まで","16:00まで","17:00まで","18:00まで"], a: 1 },
+  { q: "イベントの参加費は？", opts: ["500円","1,000円","無料","2,000円"], a: 2 },
+  { q: "Age-Well KOBE 2026の主催者は？", opts: ["神戸市","Age-Well Festival実行委員会（AgeWellJapan・神戸新聞社）","阪急電鉄","兵庫県"], a: 1 },
+  { q: "ブースエリアの場所は？", opts: ["神戸三宮センター街一丁目","元町商店街","メリケンパーク","ハーバーランド"], a: 0 },
+  { q: "ステージエリアの場所は？", opts: ["三宮駅前広場","神戸阪急 本館・新館間","大丸神戸店前","神戸市役所前"], a: 1 },
+  { q: "「Age-Well」の意味として正しいのは？", opts: ["健康食品のブランド名","挑戦と発見を通じてポジティブに年を重ねること","高齢者向け保険商品","神戸の新しい観光地の名前"], a: 1 },
+  { q: "このイベントのキャッチコピーは？", opts: ["人生100年時代のお祭り！","未来を創る神戸の夏","みんなの健康フェス","神戸から世界へ"], a: 0 },
+
+  // ── スタンプラリー ──
+  { q: "スタンプラリーの対象ブースは何番から何番まで？", opts: ["1番〜11番","3番〜11番","1番〜9番","2番〜10番"], a: 1 },
+  { q: "スタンプラリーで「花束」がもらえるのはどの組み合わせ？", opts: ["○を3個","○を4個＋○を3個","○を6個","○を4個＋○を6個"], a: 1 },
+  { q: "スタンプラリーで「Age-Wellな景品」がもらえるのはどの組み合わせ？", opts: ["○を4個＋○を3個","○を4個＋○を6個","○を10個","○を2個"], a: 1 },
+  { q: "スタンプラリーのお花を提供しているのは？", opts: ["HUGフラワー","永田良介商店","ソフトバンク","神戸新聞社"], a: 0 },
+
+  // ── ブース番号 ──
+  { q: "ブース番号1は何のブース？", opts: ["受付","フォトブース","ネッツトヨタ神戸","ソフトバンク"], a: 1 },
+  { q: "ブース番号5は何のブース？", opts: ["阪急電鉄","株式会社AgeWellJapan","神戸新聞社","神戸製鋼所"], a: 1 },
+  { q: "ブース番号6は何のブース？", opts: ["株式会社神戸新聞社","永田良介商店","エイベックス・アライアンス&パートナーズ","ソフトバンク"], a: 0 },
+  { q: "ブース番号7「コベルコ神戸スティーラーズ」を運営しているのは？", opts: ["神戸新聞社","株式会社神戸製鋼所","阪急電鉄","AgeWellJapan"], a: 1 },
+  { q: "ブース番号9の出展社は？", opts: ["エイベックス・アライアンス&パートナーズ株式会社","永田良介商店","ソフトバンク","ネッツトヨタ神戸"], a: 0 },
+  { q: "ブース番号10「永田良介商店」が手がけるものは？", opts: ["家具","洋菓子","生花","保険"], a: 0 },
+  { q: "ブース番号4の阪急電鉄が体験できる座席サービス名は？", opts: ["PRiVACE","グリーン車","プレミアムシート","VIPシート"], a: 0 },
+  { q: "ネッツトヨタ神戸のブース番号は？", opts: ["2番","3番","4番","5番"], a: 1 },
+
+  // ── ブースの詳しい内容 ──
+  { q: "フォトブースのキャッチコピーは？", opts: ["世代を超えて笑顔が咲く、共にみんなでAge-Well！","最高の1枚をあなたに","記念撮影はこちら","思い出をカタチに"], a: 0 },
+  { q: "受付ブースでアンケートに答えると何がもらえる？", opts: ["景品","割引券","お菓子","ポイントカード"], a: 0 },
+  { q: "ネッツトヨタ神戸ブースで展示される次世代近距離モビリティの名前は？", opts: ["WHILL（ウィル）","セグウェイ","Uni-Cub","COMS"], a: 0 },
+  { q: "ネッツトヨタ神戸ブースで体験できる、クルマと一緒に自分も点検できるシステムの名前は？", opts: ["ドライビング・ヘルス","セーフティチェック","ドライブドック","カーヘルスケア"], a: 0 },
+  { q: "ネッツトヨタ神戸と尾西食品のコラボ商品名は？", opts: ["車載非常食セット","防災おにぎりセット","非常持ち出しパック","カー用品セット"], a: 0 },
+  { q: "阪急電鉄ブース（4番）で記念撮影できるのは何と一緒？", opts: ["電車パネル","駅員コスプレ衣装","阪急バス","マスコットキャラクター"], a: 0 },
+  { q: "AgeWellJapanブースでできることは？", opts: ["敬老の日に向けて大切な方へ手紙を書ける","名刺交換会","就職相談","占い体験"], a: 0 },
+  { q: "神戸新聞社ブースの特設テーマは？", opts: ["敬老の日に向けた、健康を考えて読める本の特設コーナー","新聞の歴史展示","記者体験コーナー","号外の配布"], a: 0 },
+  { q: "コベルコ神戸スティーラーズブースでできることは？", opts: ["レアグッズが当たるガチャ","ラグビー体験教室","選手のサイン会","ユニフォーム販売"], a: 0 },
+  { q: "阪急電鉄「ええはがき」ブースで公式Instagramをフォローするともらえるプレゼントは？", opts: ["オリジナルマスキングテープ","缶バッジ","クリアファイル","ステッカー"], a: 0 },
+  { q: "「阪急ええはがきコンテスト」に応募できる作品の形式は？", opts: ["写真・絵画・メッセージ","動画のみ","俳句のみ","イラストのみ"], a: 0 },
+  { q: "エイベックス・アライアンス&パートナーズのブースで啓発しているのは？", opts: ["肝炎・特殊詐欺・不審者情報などの啓発","音楽イベントの告知","スポーツ振興","環境保護活動"], a: 0 },
+  { q: "ソフトバンクのAI手相体験でわかることは？", opts: ["意外な才能や特徴","血液型","運勢の点数","星座占い"], a: 0 },
+
+  // ── 9月19日(土)ステージ ──
+  { q: "9月19日(土)のオープニングアクトを飾った学校は？", opts: ["滝川第二高等学校","神戸市立六甲アイランド高等学校","神戸学院大学","六甲アイランド中学校"], a: 1 },
+  { q: "9月19日10:40からのステージ内容は？", opts: ["阪急電鉄公式YouTubeチャンネルの館長と駅員によるトークショー","神戸新聞社の未来を語るトーク","AI技術セミナー","健康長寿講座"], a: 0 },
+  { q: "9月19日11:35からのステージ内容は？", opts: ["阿波踊り","チアダンス（CHEER FAMILY）","ゴスペル","サンバ"], a: 1 },
+  { q: "9月19日12:15からのゴスペルパフォーマンスを行うのは？", opts: ["Gospel Choir Angels","CHEER FAMILY","FIDA JAPAN","ミカディスコ"], a: 0 },
+  { q: "9月19日13:00からのトークセッションのタイトルは？", opts: ["神戸から始まる、多世代共創のまちづくり","阪急電車のこれから","シニアの健康対策","神戸の未来ビジョン"], a: 0 },
+  { q: "9月19日14:00からの「ロマンディスコ」を主催するのは？", opts: ["FIDA JAPAN","ミカディスコ","チャンミカ","ユタコロジー株式会社"], a: 0 },
+  { q: "9月19日14:40からの「阿波踊り」を披露するのは？", opts: ["神戸楠公連","パイナップルアロハフラ","studio ZONE★DIVA","G.R.E.S."], a: 0 },
+  { q: "9月19日のステージ最後（トリ）を飾るのは？", opts: ["バブリーチアーズHoNEy FLASH","ミカディスコ","チャンミカ","CHEER FAMILY"], a: 0 },
+
+  // ── 9月20日(日)ステージ ──
+  { q: "9月20日(日)のオープニングアクトを飾った学校は？", opts: ["神戸市立六甲アイランド高校","滝川第二高等学校","灘高校","神戸高校"], a: 1 },
+  { q: "9月20日10:45からの「フラダンスパフォーマンスと体験」を行うのは？", opts: ["パイナップルアロハフラ","studio ZONE★DIVA","G.R.E.S.","ミカディスコ"], a: 0 },
+  { q: "9月20日11:30からの「チアダンスパフォーマンス」を行うのは？", opts: ["studio ZONE★DIVA","CHEER FAMILY","FIDA JAPAN","チャンミカ"], a: 0 },
+  { q: "9月20日13:00からの「サンバチームステージショー」を行うのは？", opts: ["G.R.E.S. Acadêmicos do Feijão Preto","パイナップルアロハフラ","ミカディスコ","CHEER FAMILY"], a: 0 },
+  { q: "9月20日14:00からの「これぞAge-Well！ダンスで健康に！！」を行うのは？", opts: ["FIDA JAPAN／ダンス健康クラブ","ミカディスコ","チャンミカ","神戸楠公連"], a: 0 },
+  { q: "9月20日14:15からの「昭和＆平成の名曲で盛り上がろう！」を担当するのは？", opts: ["チャンミカ","ミカディスコ","CHEER FAMILY","パイナップルアロハフラ"], a: 0 },
+  { q: "9月20日のステージ最後（トリ）を飾るのは？", opts: ["ミカディスコ","バブリーチアーズ","神戸楠公連","CHEER FAMILY"], a: 0 },
+
+  // ── その他 ──
+  { q: "パンフレット記載のGOLDスポンサーは阪急のほかにどれ？", opts: ["Metz Kobe Fam.","SoftBank","FIDA JAPAN","ユタコロジー株式会社"], a: 0 }
+];
+
+// ここにGoogle Apps ScriptのウェブアプリURLを貼り付けてください
+// 例: https://script.google.com/macros/s/AKfycb.../exec
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxbqlkCpPxAQUk_0elVY6qoZyCc8JjrNKxI-0CeQAwSVJYdkf9cRC9X879SKdG2S5_u/exec";
+
+let current = 0;
+let score = 0;
+let answered = false;
+let playerName = "";
+
+const introArea = document.getElementById('introArea');
+const nameInput = document.getElementById('nameInput');
+const startBtn = document.getElementById('startBtn');
+const qNum = document.getElementById('qNum');
+const qScore = document.getElementById('qScore');
+const progressFill = document.getElementById('progressFill');
+const questionText = document.getElementById('questionText');
+const optionsArea = document.getElementById('optionsArea');
+const feedback = document.getElementById('feedback');
+const nextBtn = document.getElementById('nextBtn');
+const quizArea = document.getElementById('quizArea');
+const resultArea = document.getElementById('resultArea');
+const finalScore = document.getElementById('finalScore');
+const finalMsg = document.getElementById('finalMsg');
+const retryBtn = document.getElementById('retryBtn');
+const adminLink = document.getElementById('adminLink');
+const adminModal = document.getElementById('adminModal');
+const adminPassword = document.getElementById('adminPassword');
+const adminSubmit = document.getElementById('adminSubmit');
+const adminClose = document.getElementById('adminClose');
+const adminMsg = document.getElementById('adminMsg');
+const adminResultWrap = document.getElementById('adminResultWrap');
+const adminSummary = document.getElementById('adminSummary');
+const adminTableBody = document.getElementById('adminTableBody');
+
+startBtn.addEventListener('click', () => {
+  playerName = nameInput.value.trim();
+  introArea.classList.add('hide');
+  quizArea.style.display = 'block';
+  renderQuestion();
+});
+
+function renderQuestion() {
+  answered = false;
+  const item = questions[current];
+  qNum.textContent = `第${current + 1}問 / ${questions.length}`;
+  qScore.textContent = `正解 ${score}`;
+  progressFill.style.width = `${(current / questions.length) * 100}%`;
+  questionText.textContent = item.q;
+  optionsArea.innerHTML = '';
+  feedback.className = 'feedback';
+  feedback.textContent = '';
+  nextBtn.classList.remove('show');
+
+  item.opts.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => selectAnswer(idx));
+    optionsArea.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const item = questions[current];
+  const buttons = optionsArea.querySelectorAll('.option');
+  buttons.forEach((b) => (b.disabled = true));
+
+  if (idx === item.a) {
+    score++;
+    buttons[idx].classList.add('correct');
+    feedback.className = 'feedback ok show';
+    feedback.textContent = '正解です！';
+  } else {
+    buttons[idx].classList.add('incorrect');
+    buttons[item.a].classList.add('correct');
+    feedback.className = 'feedback ng show';
+    feedback.textContent = '残念、不正解です。正解は緑色の選択肢です。';
+  }
+  qScore.textContent = `正解 ${score}`;
+  nextBtn.classList.add('show');
+}
+
+nextBtn.addEventListener('click', () => {
+  current++;
+  if (current < questions.length) {
+    renderQuestion();
+  } else {
+    showResult();
+  }
+});
+
+function showResult() {
+  progressFill.style.width = '100%';
+  quizArea.style.display = 'none';
+  resultArea.classList.add('show');
+  finalScore.textContent = `${score} / ${questions.length}`;
+  let msg = '';
+  const rate = score / questions.length;
+  if (rate === 1) msg = 'パーフェクト！あなたは立派なAge-Well博士です！';
+  else if (rate >= 0.8) msg = 'すばらしい！Age-Well KOBEのことをよくご存知ですね。';
+  else if (rate >= 0.5) msg = 'なかなかの正解率！会場を回ればもっと詳しくなれます。';
+  else msg = 'ぜひ会場のブースやステージを巡って、Age-Wellな1日を楽しんでください！';
+  finalMsg.textContent = msg;
+  submitResult();
+}
+
+function submitResult() {
+  if (!WEBAPP_URL || WEBAPP_URL.indexOf('PASTE_YOUR') === 0) return; // URL未設定なら送信しない
+  fetch(WEBAPP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // プリフライトを避けるため text/plain で送信
+    body: JSON.stringify({
+      name: playerName || '匿名',
+      score: score,
+      total: questions.length
+    })
+  }).catch(() => { /* 通信に失敗しても回答者側の体験は止めない */ });
+}
+
+retryBtn.addEventListener('click', () => {
+  current = 0;
+  score = 0;
+  introArea.classList.remove('hide');
+  nameInput.value = playerName;
+  quizArea.style.display = 'none';
+  resultArea.classList.remove('show');
+});
+
+// ── 運営者用：回答一覧 ──
+adminLink.addEventListener('click', () => {
+  adminModal.classList.add('show');
+  adminPassword.value = '';
+  adminMsg.textContent = '';
+  adminResultWrap.style.display = 'none';
+});
+
+adminClose.addEventListener('click', () => {
+  adminModal.classList.remove('show');
+});
+
+adminSubmit.addEventListener('click', fetchAdminResults);
+adminPassword.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') fetchAdminResults();
+});
+
+function fetchAdminResults() {
+  const pw = adminPassword.value.trim();
+  if (!pw) {
+    adminMsg.textContent = 'パスワードを入力してください';
+    adminMsg.className = 'modal-msg error';
+    return;
+  }
+  if (!WEBAPP_URL || WEBAPP_URL.indexOf('PASTE_YOUR') === 0) {
+    adminMsg.textContent = '設定が完了していません（WEBAPP_URL未設定）';
+    adminMsg.className = 'modal-msg error';
+    return;
+  }
+  adminMsg.textContent = '確認中…';
+  adminMsg.className = 'modal-msg';
+  adminResultWrap.style.display = 'none';
+
+  fetch(`${WEBAPP_URL}?password=${encodeURIComponent(pw)}`)
+    .then((res) => res.json())
+    .then((json) => {
+      if (json.result !== 'ok') {
+        adminMsg.textContent = json.message || 'パスワードが違います';
+        adminMsg.className = 'modal-msg error';
+        return;
+      }
+      adminMsg.textContent = '';
+      const list = json.data || [];
+      const avg = list.length
+        ? (list.reduce((sum, r) => sum + Number(r.score), 0) / list.length).toFixed(1)
+        : 0;
+      adminSummary.textContent = `回答者数：${list.length}人　平均スコア：${avg}点`;
+      adminTableBody.innerHTML = list.map((r) => {
+        const d = new Date(r.timestamp);
+        const dateStr = isNaN(d.getTime()) ? r.timestamp : d.toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        return `<tr><td>${dateStr}</td><td>${escapeHtml(r.name)}</td><td>${r.score} / ${r.total}</td></tr>`;
+      }).join('');
+      adminResultWrap.style.display = 'block';
+    })
+    .catch(() => {
+      adminMsg.textContent = '通信エラーが発生しました。時間をおいて再度お試しください。';
+      adminMsg.className = 'modal-msg error';
+    });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>
